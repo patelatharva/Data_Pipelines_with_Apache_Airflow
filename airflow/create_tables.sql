@@ -26,7 +26,7 @@ CREATE TABLE public.time (
 );
 
 CREATE TABLE public.songplays (
-	songplay_id varchar(32) NOT NULL,
+	songplay_id varchar(32) IDENTITY(0,1) NOT NULL,
 	start_time timestamp NOT NULL,
 	user_id int4 NOT NULL,
 	"level" varchar(256),

@@ -1,4 +1,5 @@
 class SqlQueries:
+    
     truncate_table = ("""
         TRUNCATE {}
     """)
@@ -10,6 +11,7 @@ class SqlQueries:
         SECRET_ACCESS_KEY '{}'
         IGNOREHEADER 1
         DELIMITER ','
+        region 'us-west-2'
     """)
     copy_json_to_redshift = ("""
         COPY {}
@@ -17,11 +19,19 @@ class SqlQueries:
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
         format as json 'auto'
+        region 'us-west-2'
+    """)
+    copy_json_with_json_path_to_redshift = ("""
+        COPY {}
+        FROM '{}'
+        ACCESS_KEY_ID '{}'
+        SECRET_ACCESS_KEY '{}'
+        json '{}'
+        region 'us-west-2'
     """)
     songplay_table_insert = ("""
-        INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
+        INSERT INTO songplays (start_time, user_id, level, song_id, artist_id, session_id, location, user_agent)
         SELECT
-                md5(events.sessionid || events.start_time) songplay_id,
                 events.start_time, 
                 events.userid as user_id, 
                 events.level, 
@@ -32,7 +42,7 @@ class SqlQueries:
                 events.useragent as user_agent
                 FROM (SELECT TIMESTAMP 'epoch' + ts/1000 * interval '1 second' AS start_time, *
             FROM staging_events
-            WHERE page='NextSong') events
+            WHERE page='NextSong' AND userid IS NOT NULL) events
             LEFT JOIN staging_songs songs
             ON events.song = songs.title
                 AND events.artist = songs.artist_name
@@ -47,7 +57,7 @@ class SqlQueries:
         gender, 
         level
         FROM staging_events
-        WHERE page='NextSong'
+        WHERE page='NextSong' AND userid IS NOT NULL
     """)
 
     song_table_insert = ("""
